@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, ReactNode } from 'react'
 
 interface User {
   username: string
@@ -25,18 +25,17 @@ const STORAGE_KEY = 'tslearn_user'
 const CREDENTIALS_KEY = 'tslearn_credentials'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-
-  useEffect(() => {
+  const [user, setUser] = useState<User | null>(() => {
     const stored = localStorage.getItem(STORAGE_KEY)
     if (stored) {
       try {
-        setUser(JSON.parse(stored))
+        return JSON.parse(stored) as User
       } catch {
         localStorage.removeItem(STORAGE_KEY)
       }
     }
-  }, [])
+    return null
+  })
 
   const login = (credentials: Credentials): boolean => {
     const stored = localStorage.getItem(CREDENTIALS_KEY)

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
+import { createContext, useContext, useState, useCallback, ReactNode } from 'react'
 import { modules } from './content'
 
 interface LessonProgress {
@@ -51,11 +51,7 @@ function saveToStorage(state: ProgressState) {
 }
 
 export function ProgressProvider({ children }: { children: ReactNode }) {
-  const [progress, setProgress] = useState<ProgressState>(defaultProgress)
-
-  useEffect(() => {
-    setProgress(loadFromStorage())
-  }, [])
+  const [progress, setProgress] = useState<ProgressState>(loadFromStorage)
 
   const markLessonComplete = useCallback((moduleId: string, lessonSlug: string) => {
     const key = `${moduleId}/${lessonSlug}`
