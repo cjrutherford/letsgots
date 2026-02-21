@@ -25,6 +25,9 @@ import testingMocking from '../content/modules/testing/03-mocking.md?raw'
 import frontendReactTypescript from '../content/modules/frontend/01-react-typescript.md?raw'
 import frontendHooksTyping from '../content/modules/frontend/02-hooks-typing.md?raw'
 import frontendComponentPatterns from '../content/modules/frontend/03-component-patterns.md?raw'
+import angularComponents from '../content/modules/angular/01-angular-components.md?raw'
+import angularServicesDi from '../content/modules/angular/02-angular-services-di.md?raw'
+import angularFormsRouting from '../content/modules/angular/03-angular-forms-routing.md?raw'
 import backendNodejsTypescript from '../content/modules/backend/01-nodejs-typescript.md?raw'
 import backendExpressTypescript from '../content/modules/backend/02-express-typescript.md?raw'
 import backendRestApis from '../content/modules/backend/03-rest-apis.md?raw'
@@ -62,6 +65,9 @@ export const lessonContent: Record<string, string> = {
   'frontend/react-typescript': frontendReactTypescript,
   'frontend/hooks-typing': frontendHooksTyping,
   'frontend/component-patterns': frontendComponentPatterns,
+  'angular/angular-components': angularComponents,
+  'angular/angular-services-di': angularServicesDi,
+  'angular/angular-forms-routing': angularFormsRouting,
   'backend/nodejs-typescript': backendNodejsTypescript,
   'backend/express-typescript': backendExpressTypescript,
   'backend/rest-apis': backendRestApis,
@@ -204,6 +210,18 @@ export const modules: Module[] = [
       { id: 'react-typescript', slug: 'react-typescript', title: 'React + TypeScript', description: 'Typing components, props, and refs' },
       { id: 'hooks-typing', slug: 'hooks-typing', title: 'Typing Hooks', description: 'useState, useReducer, useContext, custom hooks' },
       { id: 'component-patterns', slug: 'component-patterns', title: 'Component Patterns', description: 'Generics, compound components, HOCs' },
+    ],
+  },
+  {
+    id: 'angular',
+    title: 'Frontend with Angular',
+    description: 'Angular components, services, DI, forms, and routing — with React parity.',
+    icon: '🅰️',
+    color: '#dd0031',
+    lessons: [
+      { id: 'angular-components', slug: 'angular-components', title: 'Angular Components', description: 'Decorators, templates, lifecycle hooks, and Signals' },
+      { id: 'angular-services-di', slug: 'angular-services-di', title: 'Services & DI', description: 'Injectable services, RxJS, and the DI container' },
+      { id: 'angular-forms-routing', slug: 'angular-forms-routing', title: 'Forms & Routing', description: 'Reactive forms, validators, and the Angular Router' },
     ],
   },
   {

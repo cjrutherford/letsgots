@@ -564,6 +564,209 @@ console.log(renderButton({ label: "Submit", disabled: true }))
     points: 20,
     difficulty: 'medium',
   },
+  // ── Angular ──────────────────────────────────────────────────────────────
+  {
+    id: 'angular-component-class',
+    lessonSlug: 'angular-components',
+    moduleId: 'angular',
+    title: 'Angular Component Metadata',
+    description: 'Simulate Angular\'s @Component decorator pattern. Create a `componentMeta` function that accepts a config object with `selector`, `template`, and an optional `standalone` flag. Return a typed metadata object.',
+    starterCode: `interface ComponentConfig {
+  selector: string
+  template: string
+  standalone?: boolean
+}
+
+interface ComponentMeta {
+  selector: string
+  template: string
+  standalone: boolean
+}
+
+function componentMeta(config: ComponentConfig): ComponentMeta {
+  // Return a ComponentMeta with standalone defaulting to false
+}
+
+const meta = componentMeta({
+  selector: 'app-button',
+  template: '<button>Click me</button>',
+  standalone: true,
+})
+
+console.log(meta.selector)
+console.log(meta.standalone)
+`,
+    expectedOutput: 'app-button\ntrue\n',
+    testCode: `test('selector is stored', function () {
+  var m = componentMeta({ selector: 'app-foo', template: '<p></p>' });
+  expect(m.selector).toBe('app-foo');
+});
+test('template is stored', function () {
+  var m = componentMeta({ selector: 'app-foo', template: '<p>Hello</p>' });
+  expect(m.template).toBe('<p>Hello</p>');
+});
+test('standalone defaults to false', function () {
+  var m = componentMeta({ selector: 'app-foo', template: '' });
+  expect(m.standalone).toBe(false);
+});
+test('standalone can be set to true', function () {
+  var m = componentMeta({ selector: 'app-foo', template: '', standalone: true });
+  expect(m.standalone).toBe(true);
+});`,
+    hints: [
+      'Use the spread operator or explicit assignment',
+      'standalone ?? false gives the default',
+    ],
+    points: 20,
+    difficulty: 'medium',
+  },
+  {
+    id: 'angular-service-di',
+    lessonSlug: 'angular-services-di',
+    moduleId: 'angular',
+    title: 'Injectable Service Pattern',
+    description: 'Create a `UserService` class with `add(user: User)` and `getAll(): User[]`. Then build an `InjectionContainer` with `register` and `get<T>` methods that store singleton instances by name.',
+    starterCode: `interface User {
+  id: number
+  name: string
+}
+
+class UserService {
+  private users: User[] = []
+
+  add(user: User): void {
+    // push user into this.users
+  }
+
+  getAll(): User[] {
+    // return a copy of this.users
+  }
+}
+
+class InjectionContainer {
+  private instances = new Map<string, unknown>()
+
+  register<T>(name: string, instance: T): void {
+    this.instances.set(name, instance)
+  }
+
+  get<T>(name: string): T {
+    const instance = this.instances.get(name)
+    if (!instance) throw new Error(\`No provider for \${name}\`)
+    return instance as T
+  }
+}
+
+const container = new InjectionContainer()
+container.register('UserService', new UserService())
+
+const svc = container.get<UserService>('UserService')
+svc.add({ id: 1, name: 'Alice' })
+svc.add({ id: 2, name: 'Bob' })
+console.log(svc.getAll().length)
+console.log(svc.getAll()[0].name)
+`,
+    expectedOutput: '2\nAlice\n',
+    testCode: `var svc2 = new UserService();
+test('add() stores users', function () {
+  svc2.add({ id: 1, name: 'Alice' });
+  expect(svc2.getAll().length).toBe(1);
+});
+test('getAll() returns all stored users', function () {
+  svc2.add({ id: 2, name: 'Bob' });
+  expect(svc2.getAll().length).toBe(2);
+});
+test('getAll() returns a copy (mutation safety)', function () {
+  var copy = svc2.getAll();
+  copy.push({ id: 99, name: 'Hacker' });
+  expect(svc2.getAll().length).toBe(2);
+});
+test('InjectionContainer resolves registered service', function () {
+  var c = new InjectionContainer();
+  var us = new UserService();
+  c.register('UserService', us);
+  expect(c.get('UserService')).toBe(us);
+});
+test('InjectionContainer throws for unknown token', function () {
+  var c = new InjectionContainer();
+  expect(function () { c.get('MissingService'); }).toThrow('No provider for MissingService');
+});`,
+    hints: [
+      'Use this.users.push(user) in add()',
+      'Return [...this.users] in getAll() to return a defensive copy',
+    ],
+    points: 30,
+    difficulty: 'hard',
+  },
+  {
+    id: 'angular-reactive-form',
+    lessonSlug: 'angular-forms-routing',
+    moduleId: 'angular',
+    title: 'Reactive Form Validation',
+    description: 'Simulate Angular Reactive Forms. Create a `FormControl<T>` class with `value`, a `valid` getter (true when all validators return null), and an `errors` getter (array of non-null error strings).',
+    starterCode: `type ValidatorFn<T> = (value: T) => string | null
+
+class FormControl<T> {
+  validators: ValidatorFn<T>[]
+
+  constructor(public value: T, validators: ValidatorFn<T>[] = []) {
+    this.validators = validators
+  }
+
+  get valid(): boolean {
+    // Return true if every validator returns null
+  }
+
+  get errors(): string[] {
+    // Return array of non-null validator results
+  }
+}
+
+const required = (v: unknown) => (v === '' || v == null) ? 'required' : null
+const minLength = (min: number) => (v: string) => v.length >= min ? null : \`minLength:\${min}\`
+const isEmail   = (v: string) => /^[^@]+@[^@]+\\.[^@]+$/.test(v) ? null : 'email'
+
+const emailCtrl = new FormControl('', [required, isEmail])
+console.log(emailCtrl.valid)
+
+emailCtrl.value = 'bad'
+console.log(emailCtrl.valid)
+
+emailCtrl.value = 'alice@example.com'
+console.log(emailCtrl.valid)
+`,
+    expectedOutput: 'false\nfalse\ntrue\n',
+    testCode: `const req  = (v) => (v === '' || v == null) ? 'required' : null;
+const min5 = (v) => v.length >= 5 ? null : 'minLength:5';
+const email = (v) => /^[^@]+@[^@]+\\.[^@]+$/.test(v) ? null : 'email';
+
+test('valid is false when value fails required', function () {
+  var c = new FormControl('', [req]);
+  expect(c.valid).toBe(false);
+});
+test('valid is true when all validators pass', function () {
+  var c = new FormControl('hello', [req, min5]);
+  expect(c.valid).toBe(true);
+});
+test('valid is false when any validator fails', function () {
+  var c = new FormControl('hi', [req, min5]);
+  expect(c.valid).toBe(false);
+});
+test('errors returns array of failed messages', function () {
+  var c = new FormControl('', [req, email]);
+  expect(c.errors).toContain('required');
+});
+test('errors is empty when all pass', function () {
+  var c = new FormControl('alice@example.com', [req, email]);
+  expect(c.errors.length).toBe(0);
+});`,
+    hints: [
+      'valid: return this.validators.every(v => v(this.value) === null)',
+      'errors: return this.validators.map(v => v(this.value)).filter(e => e !== null) as string[]',
+    ],
+    points: 30,
+    difficulty: 'hard',
+  },
   // ── Backend ──────────────────────────────────────────────────────────────
   {
     id: 'backend-type-guard',
