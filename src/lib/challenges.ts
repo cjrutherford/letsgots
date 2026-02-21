@@ -6,6 +6,7 @@ export interface Challenge {
   description: string
   starterCode: string
   expectedOutput: string
+  testCode?: string
   hints: string[]
   points: number
   difficulty: 'easy' | 'medium' | 'hard'
@@ -72,6 +73,16 @@ const alice: Person = {
 console.log(\`\${alice.name} is \${alice.age} years old\`)
 `,
     expectedOutput: 'Alice is 30 years old\n',
+    testCode: `test('alice.name is "Alice"', function () {
+  expect(alice.name).toBe('Alice');
+});
+test('alice.age is 30', function () {
+  expect(alice.age).toBe(30);
+});
+test('alice satisfies the Person shape', function () {
+  expect(typeof alice.name).toBe('string');
+  expect(typeof alice.age).toBe('number');
+});`,
     hints: [
       'Add name: string to the interface',
       'Add age: number to the interface',
@@ -93,6 +104,18 @@ console.log(\`\${alice.name} is \${alice.age} years old\`)
 console.log(add(3, 4))
 `,
     expectedOutput: '7\n',
+    testCode: `test('add(3, 4) returns 7', function () {
+  expect(add(3, 4)).toBe(7);
+});
+test('add(0, 0) returns 0', function () {
+  expect(add(0, 0)).toBe(0);
+});
+test('add(-1, 1) returns 0', function () {
+  expect(add(-1, 1)).toBe(0);
+});
+test('add(10, 5) returns 15', function () {
+  expect(add(10, 5)).toBe(15);
+});`,
     hints: [
       'Use the return keyword',
       'Return a + b',
@@ -176,6 +199,19 @@ console.log(identity("hello"))
 console.log(identity(42))
 `,
     expectedOutput: 'hello\n42\n',
+    testCode: `test('identity returns a string unchanged', function () {
+  expect(identity('hello')).toBe('hello');
+});
+test('identity returns a number unchanged', function () {
+  expect(identity(42)).toBe(42);
+});
+test('identity returns a boolean unchanged', function () {
+  expect(identity(true)).toBe(true);
+});
+test('identity returns an object reference unchanged', function () {
+  var obj = { x: 1 };
+  expect(identity(obj)).toBe(obj);
+});`,
     hints: ['Just return the value parameter'],
     points: 20,
     difficulty: 'medium',
@@ -404,22 +440,102 @@ console.log(multiply(2, 3))
     id: 'testing-assertions',
     lessonSlug: 'vitest-basics',
     moduleId: 'testing',
-    title: 'Manual Assertions',
-    description: 'Write a simple `assert` function that throws if the condition is false. Use it to test an add function.',
-    starterCode: `function assert(condition: boolean, message: string): void {
-  if (!condition) throw new Error(\`Assertion failed: \${message}\`)
+    title: 'Assertions with expect()',
+    description: 'Use the built-in `expect()` and `test()` functions to test a `multiply` function. Write at least three test cases.',
+    starterCode: `function multiply(a: number, b: number): number {
+  // Implement multiplication
 }
-
-function add(a: number, b: number): number {
-  return a + b
-}
-
-assert(add(1, 2) === 3, "1 + 2 should be 3")
-assert(add(0, 0) === 0, "0 + 0 should be 0")
-console.log("All tests passed!")
 `,
-    expectedOutput: 'All tests passed!\n',
-    hints: ['The code is complete – just run it'],
+    expectedOutput: '',
+    testCode: `test('multiply(2, 3) returns 6', function () {
+  expect(multiply(2, 3)).toBe(6);
+});
+test('multiply(0, 100) returns 0', function () {
+  expect(multiply(0, 100)).toBe(0);
+});
+test('multiply(-2, 5) returns -10', function () {
+  expect(multiply(-2, 5)).toBe(-10);
+});
+test('multiply(1, 42) returns 42', function () {
+  expect(multiply(1, 42)).toBe(42);
+});`,
+    hints: [
+      'Use the return keyword to return a * b',
+    ],
+    points: 20,
+    difficulty: 'medium',
+  },
+  // ── New spy challenge ─────────────────────────────────────────────────────
+  {
+    id: 'testing-spy',
+    lessonSlug: 'type-safe-testing',
+    moduleId: 'testing',
+    title: 'Spy on Function Calls',
+    description: 'Create a `Logger` class with a `log(msg: string)` method. Use `spy()` to verify it calls `console.log` with the correct prefixed message.',
+    starterCode: `function createLogger(prefix: string) {
+  return {
+    log(msg: string): void {
+      // Call console.log with \`[\${prefix}] \${msg}\`
+    }
+  }
+}
+`,
+    expectedOutput: '',
+    testCode: `var logger = createLogger('INFO');
+var _orig = console.log.bind(console);
+var logSpy = spy(_orig);
+console.log = logSpy;
+
+logger.log('server started');
+logger.log('ready');
+
+test('log() calls console.log with the prefixed message', function () {
+  expect(logSpy).toHaveBeenCalledWith('[INFO] server started');
+});
+test('log() prefixes every call', function () {
+  expect(logSpy).toHaveBeenCalledWith('[INFO] ready');
+});
+test('log() was called exactly twice', function () {
+  expect(logSpy).toHaveBeenCalledTimes(2);
+});
+
+console.log = _orig;`,
+    hints: [
+      "Inside log(), type: console.log(`[${prefix}] ${msg}`) — a template literal",
+      'The spy wraps the real console.log and records all calls',
+    ],
+    points: 30,
+    difficulty: 'hard',
+  },
+  // ── toThrow challenge ─────────────────────────────────────────────────────
+  {
+    id: 'testing-throw',
+    lessonSlug: 'type-safe-testing',
+    moduleId: 'testing',
+    title: 'Testing Error Cases with toThrow()',
+    description: 'Write a `divide(a, b)` function that throws when `b` is 0. Use `expect().toThrow()` to verify the error path, and `expect().toBe()` for the happy path.',
+    starterCode: `function divide(a: number, b: number): number {
+  // Throw an Error with message "Division by zero" when b === 0
+  // Otherwise return a / b
+}
+`,
+    expectedOutput: '',
+    testCode: `test('divide(10, 2) returns 5', function () {
+  expect(divide(10, 2)).toBe(5);
+});
+test('divide(9, 3) returns 3', function () {
+  expect(divide(9, 3)).toBe(3);
+});
+test('divide(x, 0) throws "Division by zero"', function () {
+  expect(function () { divide(10, 0); }).toThrow('Division by zero');
+});
+test('divide(0, 5) returns 0', function () {
+  expect(divide(0, 5)).toBe(0);
+});`,
+    hints: [
+      'Use: if (b === 0) throw new Error("Division by zero")',
+      'Then return a / b',
+    ],
     points: 20,
     difficulty: 'medium',
   },
@@ -470,6 +586,21 @@ console.log(processInput("hello"))
 console.log(processInput(42))
 `,
     expectedOutput: 'HELLO\n42\n',
+    testCode: `test('isString returns true for strings', function () {
+  expect(isString('hello')).toBe(true);
+});
+test('isString returns false for numbers', function () {
+  expect(isString(42)).toBe(false);
+});
+test('isString returns false for null', function () {
+  expect(isString(null)).toBe(false);
+});
+test('processInput uppercases strings', function () {
+  expect(processInput('hello')).toBe('HELLO');
+});
+test('processInput converts numbers to string', function () {
+  expect(processInput(42)).toBe('42');
+});`,
     hints: ['The code is complete – just run it'],
     points: 20,
     difficulty: 'medium',
